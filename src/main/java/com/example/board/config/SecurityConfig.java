@@ -1,9 +1,6 @@
 package com.example.board.config;
 
-import com.example.board.jwt.JwtAccessDeniedHandler;
-import com.example.board.jwt.JwtAuthenticationEntryPoint;
-import com.example.board.jwt.JwtAuthenticationFilter;
-import com.example.board.jwt.JwtTokenProvider;
+import com.example.board.jwt.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +21,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final JwtExceptionFilter jwtExceptionFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -58,7 +56,9 @@ public class SecurityConfig {
 
                 // [PART 5] JWT 필터 등록
                 // 기존의 UsernamePasswordAuthenticationFilter 앞에 우리가 만든 필터를 끼워 넣음
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                // ExceptionFilter -> JwtAuthFilter -> UsernamePasswordFilter 순서
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
         // ▼ formLogin(), logout() 설정은 이제 필요 없어서 삭제했습니다! ▼
 
