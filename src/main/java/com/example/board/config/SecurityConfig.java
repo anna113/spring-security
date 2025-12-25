@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         // ▼▼▼ 여기 경로를 잘 봐주세요! (/members/...) ▼▼▼
                         .requestMatchers("/members/login", "/members/join").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/members/test").hasRole("USER")
                         .anyRequest().authenticated()
                 )
