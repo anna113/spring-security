@@ -1,5 +1,7 @@
 package com.example.board.config;
 
+import com.example.board.jwt.JwtAccessDeniedHandler;
+import com.example.board.jwt.JwtAuthenticationEntryPoint;
 import com.example.board.jwt.JwtAuthenticationFilter;
 import com.example.board.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -31,6 +35,12 @@ public class SecurityConfig {
                 // [PART 2] 세션 미사용 설정 (가장 중요!)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                // [예외 처리 설정 추가]
+                .exceptionHandling((exception) -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 401 에러 핸들링
+                        .accessDeniedHandler(jwtAccessDeniedHandler)         // 403 에러 핸들링
                 )
 
                 // [PART 3] 기존의 화면 깨짐 방지 설정 유지
