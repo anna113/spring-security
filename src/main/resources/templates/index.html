@@ -1,0 +1,57 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>스프링부트 게시판</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1>🚀 스프링 부트 게시판</h1>
+
+    <div class="row mb-3">
+        <div class="col text-end">
+            <div sec:authorize="isAnonymous()">
+                <a href="/login" class="btn btn-outline-primary me-2">로그인</a>
+                <a href="/join" class="btn btn-secondary">회원가입</a>
+            </div>
+
+            <div sec:authorize="isAuthenticated()">
+                    <span class="me-3">
+                        👋 <b sec:authentication="name">사용자</b>님 환영합니다!
+                    </span>
+                <a href="/logout" class="btn btn-outline-danger">로그아웃</a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button class="btn btn-primary" onclick="location.href='/posts/save'">글 등록</button>
+        </div>
+    </div>
+
+    <br>
+    <table class="table table-horizontal table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th>게시글번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>최종수정일</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+        <tr th:each="post : ${posts}">
+            <td th:text="${post.id}"></td>
+            <td><a th:href="@{/posts/update/{id}(id=${post.id})}" th:text="${post.title}"></a></td>
+            <td th:text="${post.author}"></td>
+            <td th:text="${#temporals.format(post.modifiedDate, 'yyyy-MM-dd HH:mm')}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
