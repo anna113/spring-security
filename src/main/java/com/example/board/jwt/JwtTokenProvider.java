@@ -33,17 +33,14 @@ public class JwtTokenProvider {
 
     // 1. 토큰 생성 메서드 (유저 정보를 받아서 Access Token 생성)
     public JwtToken createToken(Authentication authentication) {
-        // 권한 가져오기 (예: USER, ADMIN)
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
 
-        // Access Token 생성
-        // 1일: 24 * 60 * 60 * 1000 = 86400000 밀리초
-        Date accessTokenExpiresIn = new Date(now + 86400000);
-
+        // 1. Access Token 생성 (30분)
+        Date accessTokenExpiresIn = new Date(now + 1800000); // 30분
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
@@ -51,9 +48,19 @@ public class JwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
+        // 2. Refresh Token 생성 (7일)
+        String refreshToken = Jwts.builder()
+                // 재발급 시에도 권한 정보가 필요하므로 subject와 auth를 넣어줍니다.
+                .setSubject(authentication.getName())
+                .claim("auth", authorities)
+                .setExpiration(new Date(now + 604800000)) // 7일
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
         return JwtToken.builder()
                 .grantType("Bearer")
                 .accessToken(accessToken)
+                .refreshToken(refreshToken) // DTO에 Refresh Token도 담아서 반환
                 .build();
     }
 

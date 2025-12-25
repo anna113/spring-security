@@ -43,4 +43,10 @@ public class MemberController {
     public String test() {
         return "success";
     }
+
+    @PostMapping("/reissue")
+    public JwtToken reissue(@RequestBody JwtToken jwtToken) {
+        // refreshToken만 보내도 되지만, DTO 재활용을 위해 전체를 받음
+        return memberService.reissue(jwtToken.getRefreshToken());
+    }
 }
