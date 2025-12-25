@@ -57,8 +57,8 @@ public class MemberService {
 
         // 3. Refresh Token 저장 (기존에 있으면 업데이트, 없으면 저장)
         RefreshToken refreshToken = RefreshToken.builder()
-                .key(authentication.getName())
-                .value(jwtToken.getRefreshToken())
+                .userId(authentication.getName())
+                .refreshToken(jwtToken.getRefreshToken())
                 .build();
 
         refreshTokenRepository.save(refreshToken); // 저장
@@ -78,11 +78,11 @@ public class MemberService {
         Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
 
         // 3. 저장소에서 User ID 를 기반으로 Refresh Token 값 가져옴
-        RefreshToken dbRefreshToken = refreshTokenRepository.findByKey(authentication.getName())
+        RefreshToken dbRefreshToken = refreshTokenRepository.findByUserId(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
 
         // 4. 토큰 일치 여부 검사 (핵심!)
-        if (!dbRefreshToken.getValue().equals(refreshToken)) {
+        if (!dbRefreshToken.getRefreshToken().equals(refreshToken)) {
             throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
         }
 
@@ -90,7 +90,7 @@ public class MemberService {
         JwtToken newJwtToken = jwtTokenProvider.createToken(authentication);
 
         // 6. 저장소 정보 업데이트 (Rotation)
-        dbRefreshToken.updateValue(newJwtToken.getRefreshToken());
+        dbRefreshToken.updateRefreshToken(newJwtToken.getRefreshToken());
 
         return newJwtToken;
     }
